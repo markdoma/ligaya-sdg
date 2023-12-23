@@ -5,8 +5,8 @@ import { useState, useEffect } from 'react'
 import { db } from '../utilities/firebase'
 import axios from 'axios'
 
-// import Modal from '../components/Modal'
-// import FormConfirmationModal from '../components/FormConfirmationModal'
+import AttendanceModal from '../components/AttendanceModal'
+import AttendanceFormConfirmation from '../components/AttendanceFormConfirmation'
 
 // import {
 //   getEventDetailsFromGoogleCalendar,
@@ -689,7 +689,7 @@ const AttendanceForm = () => {
         )}
         {/* Render the modal when isSubmitted is true or isPresentButtonClicked is true */}
         {(isConfirmed || isPresentButtonClicked) && (
-          <Modal
+          <AttendanceModal
             onClose={() => {
               setIsPresentButtonClicked(false) // Reset isPresentButtonClicked to false when modal is closed
               setIsConfirmed(false)
