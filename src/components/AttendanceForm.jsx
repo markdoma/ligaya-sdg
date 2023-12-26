@@ -3,6 +3,14 @@
 import { useState, useEffect } from 'react'
 // import { v4 as uuidv4 } from 'uuid'
 import { db } from '../utilities/firebase'
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  // FieldPath,
+  onSnapshot,
+} from 'firebase/firestore'
 import axios from 'axios'
 
 import AttendanceModal from '../components/AttendanceModal'
@@ -45,7 +53,7 @@ const AttendanceForm = () => {
   // Modals
   const [showConfirmationModal, setShowConfirmationModal] = useState(false)
 
-  const handleConfirmationModalConfirm = () => {
+  const handleConfirmationModalConfirm = async () => {
     // Handle the form submission here after the user confirms the information
     setShowConfirmationModal(false)
     setIsConfirmed(true)
@@ -102,41 +110,29 @@ const AttendanceForm = () => {
     }
 
     // Add the data to the "master_data" collection in the database
-    db.collection('master_data')
-      .add(newData)
-      .then((docRef) => {
-        console.log('Document written with ID: ', docRef.id)
 
-        // Update the newData object with the doc_id
-        newData.doc_id = docRef.id
+    const docRef = await addDoc(collection(db, 'master_data'), newData)
 
-        // Add the attendance record when the "Present" button is clicked
-        addAttendanceRecord(
-          eventDetails,
-          newData.doc_id,
-          newData.no,
-          newData.firstname,
-          newData.lastname,
-          newData.pl,
-          newData.invitedBy,
-          newData.sdg_class,
-          first,
-        )
+    console.log('Document written with ID: ', docRef.id)
 
-        // Update the "master_data" collection with the doc_id property
-        db.collection('master_data')
-          .doc(docRef.id)
-          .update({ doc_id: docRef.id })
-          .then(() => {
-            console.log('Document updated with doc_id: ', docRef.id)
-          })
-          .catch((error) => {
-            console.error('Error updating document with doc_id: ', error)
-          })
-      })
-      .catch((error) => {
-        console.error('Error adding document: ', error)
-      })
+    // Update the newData object with the doc_id
+    newData.doc_id = docRef.id
+
+    // Add the attendance record when the "Present" button is clicked
+    addAttendanceRecord(
+      eventDetails,
+      newData.doc_id,
+      newData.no,
+      newData.firstname,
+      newData.lastname,
+      newData.pl,
+      newData.invitedBy,
+      newData.sdg_class,
+      first,
+    )
+
+    // Update the "master_data" collection with the doc_id property
+    await updateDoc(docRef, { doc_id: docRef.id })
   }
 
   const handleConfirmationModalClose = () => {
@@ -177,7 +173,7 @@ const AttendanceForm = () => {
   }
 
   // Function to add a new attendance record to the "attendance" collection
-  const addAttendanceRecord = (
+  const addAttendanceRecord = async (
     event,
     id,
     no,
@@ -187,34 +183,33 @@ const AttendanceForm = () => {
     invitedBy,
     sdg_class,
     first,
+    setIsPresentButtonClicked,
   ) => {
     const newAttendanceRecord = {
       date: new Date(event.start.dateTime), // Replace with the actual event date from Google Calendar
       event: event.summary, // Replace with the actual event name from Google Calendar
-
       id: id,
       no: no,
-      firstname: capitalizeName(firstName),
-      lastname: capitalizeName(lastName),
+      firstname: firstName,
+      lastname: lastName,
+      // firstname: capitalizeName(firstName),
+      // lastname: capitalizeName(lastName),
       pastoral_leader: pl,
       invitedBy: invitedBy,
       sdg_class: sdg_class,
       first_timer: first,
     }
-    db.collection('master_data')
-      .doc(id)
-      .collection('attendance')
-      // db.collection('attendance')
-      .add(newAttendanceRecord)
-      .then((docRef) => {
-        console.log('Attendance record added with ID: ', docRef.id)
-        // If you need to do anything after successfully adding the record, you can put it here.
-      })
-      .catch((error) => {
-        console.error('Error adding attendance record: ', error)
-      })
 
-    setIsPresentButtonClicked(true)
+    try {
+      const docRef = await addDoc(
+        collection(db, 'master_data', id, 'attendance'),
+        newAttendanceRecord,
+      )
+      console.log('Attendance record added with ID: ', docRef.id)
+      setIsPresentButtonClicked(true)
+    } catch (error) {
+      console.error('Error adding attendance record: ', error)
+    }
   }
 
   useEffect(() => {
@@ -222,13 +217,13 @@ const AttendanceForm = () => {
     if (selectedName && eventDetails && eventDetails.start.dateTime) {
       const eventDateTime = new Date(eventDetails.start.dateTime)
 
-      // Firestore query to check if a matching attendance record exists
-      db.collection('master_data')
-        .doc(selectedName.doc_id)
-        .collection('attendance')
-        .where('no', '==', selectedName.no)
-        .where('date', '==', eventDateTime)
-        .get()
+      const attendanceQuery = query(
+        collection(db, 'master_data', selectedName.doc_id, 'attendance'),
+        where('no', '==', selectedName.no),
+        where('date', '==', eventDateTime),
+      )
+
+      getDocs(attendanceQuery)
         .then((querySnapshot) => {
           setIsAttendanceCaptured(!querySnapshot.empty)
         })
@@ -237,18 +232,6 @@ const AttendanceForm = () => {
         })
     }
   }, [eventDetails, selectedName])
-
-  useEffect(() => {
-    // Fetch event details from Google Calendar when the component mounts
-    getEventDetailsFromGoogleCalendar()
-      .then((event) => {
-        // setEventDetails(event);
-        setEventDetails('October 7, 2023 at 2:00:00 PM UTC+8')
-      })
-      .catch((error) => {
-        console.error('Error fetching event details: ', error)
-      })
-  }, [])
 
   const handlePresentButtonClick = () => {
     // Add the attendance record when the "Present" button is clicked
@@ -265,17 +248,21 @@ const AttendanceForm = () => {
     )
   }
 
-  //   useEffect(() => {
-  //     const unsubscribe = db.collection('master_data').onSnapshot((snapshot) => {
-  //       const fetchedMembers = snapshot.docs.map((doc) => doc.data())
-  //       setMembers(fetchedMembers)
-  //     })
+  useEffect(() => {
+    const fetchData = async () => {
+      const membersCollection = collection(db, 'master_data')
 
-  //     return () => {
-  //       // Unsubscribe from the snapshot listener when the component unmounts
-  //       unsubscribe()
-  //     }
-  //   }, [])
+      const unsubscribe = onSnapshot(membersCollection, (snapshot) => {
+        const fetchedMembers = snapshot.docs.map((doc) => doc.data())
+        setMembers(fetchedMembers)
+      })
+
+      // Return the cleanup function to unsubscribe when the component unmounts
+      return () => unsubscribe()
+    }
+
+    fetchData()
+  }, [])
 
   // Function to get the maximum "no" value from the "members" array
   const getMaxNoValue = () => {
@@ -345,7 +332,7 @@ const AttendanceForm = () => {
   }
 
   const handleMatchedNameClick = (selectedName) => {
-    // console.log(selectedName);
+    console.log(selectedName)
     const matchedRecord = members.find((record) => {
       const fullName = `${record.lastname}, ${record.firstname}`.toLowerCase()
       return fullName === selectedName.toLowerCase()
@@ -378,7 +365,7 @@ const AttendanceForm = () => {
     setUniqueCode('')
     setIsConfirmed(false)
   }
-
+  console.log(members)
   return (
     <div className="flex h-screen items-start justify-center">
       <div className="w-full max-w-md">

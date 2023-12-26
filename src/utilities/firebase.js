@@ -3,7 +3,7 @@
 // import 'firebase/firestore'
 // import 'firebase/storage'
 
-import { initializeApp, getApps } from 'firebase/app'
+import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
