@@ -150,19 +150,35 @@ const AttendanceForm = () => {
           },
         },
       )
+      // console.log(response.data)
       const currentDate = new Date()
       // const data = await response.json();
       const data = response.data.items
+      console.log(data)
       const eventsForCurrentDay = data.filter((event) => {
-        const summary = event.summary.toLowerCase()
-        const eventDate = new Date(event.start.dateTime)
-        // return eventDate.toDateString() === currentDate.toDateString();
-        return (
-          eventDate.toDateString() === currentDate.toDateString() &&
-          (summary.startsWith('sdg: district') ||
-            summary.startsWith('open') ||
-            summary.startsWith('beyond'))
-        )
+        // Check if event has start property and either dateTime or date property
+        if (event.start && (event.start.dateTime || event.start.date)) {
+          const eventDate =
+            new Date(event.start.dateTime) || new Date(event.start.date)
+          const summary = event.summary.toLowerCase()
+          const status = event.status
+
+          // Check if the event status is 'confirmed'
+          const isConfirmed = status === 'confirmed'
+
+          // Return true only if the event date matches the current date,
+          // the status is 'confirmed', and the summary matches specific criteria
+          return (
+            isConfirmed &&
+            eventDate.toDateString() === currentDate.toDateString() &&
+            (summary.startsWith('sdg: district') ||
+              summary.startsWith('open') ||
+              summary.startsWith('beyond'))
+          )
+        }
+
+        // If start or dateTime/date is missing, or status is not 'confirmed', exclude the event
+        return false
       })
       console.log(eventsForCurrentDay)
 
@@ -249,6 +265,19 @@ const AttendanceForm = () => {
   }
 
   useEffect(() => {
+    // Fetch event details from Google Calendar when the component mounts
+    getEventDetailsFromGoogleCalendar()
+      .then((event) => {
+        console.log('Fetch event date!')
+        setEventDetails(event)
+        // setEventDetails('October 7, 2023 at 2:00:00 PM UTC+8')
+      })
+      .catch((error) => {
+        console.error('Error fetching event details: ', error)
+      })
+  }, [])
+
+  useEffect(() => {
     const fetchData = async () => {
       const membersCollection = collection(db, 'master_data')
 
@@ -332,7 +361,7 @@ const AttendanceForm = () => {
   }
 
   const handleMatchedNameClick = (selectedName) => {
-    console.log(selectedName)
+    // console.log(selectedName)
     const matchedRecord = members.find((record) => {
       const fullName = `${record.lastname}, ${record.firstname}`.toLowerCase()
       return fullName === selectedName.toLowerCase()
@@ -365,7 +394,7 @@ const AttendanceForm = () => {
     setUniqueCode('')
     setIsConfirmed(false)
   }
-  console.log(members)
+  // console.log(members)
   return (
     <div className="flex h-screen items-start justify-center">
       <div className="w-full max-w-md">
