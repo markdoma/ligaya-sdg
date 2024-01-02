@@ -6,7 +6,7 @@ const AttendanceFormConfirmation = ({ data, onClose, onConfirm }) => {
       <div className="w-96 rounded-lg bg-white p-6 shadow-lg">
         <h2 className="mb-4 text-xl font-bold">Confirm Your Information</h2>
         <p className="mb-4">
-          Please review the information you provided and confirm if it's
+          Please review the information you provided and confirm if it&apos;s
           correct.
         </p>
         <div className="mb-2">

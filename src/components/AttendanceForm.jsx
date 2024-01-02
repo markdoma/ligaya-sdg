@@ -1,4 +1,4 @@
-'use client' // This is a client component 👈🏽
+'use client' 
 
 import { useState, useEffect } from 'react'
 // import { v4 as uuidv4 } from 'uuid'
@@ -14,7 +14,7 @@ import {
 import axios from 'axios'
 
 import AttendanceModal from '../components/AttendanceModal'
-import AttendanceFormConfirmation from '../components/AttendanceFormConfirmation'
+import FormConfirmationModal from '../components/AttendanceFormConfirmation'
 
 // import {
 //   getEventDetailsFromGoogleCalendar,
@@ -229,7 +229,7 @@ const AttendanceForm = () => {
   }
 
   useEffect(() => {
-    // Check if attendance is already captured for today's event
+    // Check if attendance is already captured for todays event
     if (selectedName && eventDetails && eventDetails.start.dateTime) {
       const eventDateTime = new Date(eventDetails.start.dateTime)
 
@@ -445,7 +445,7 @@ const AttendanceForm = () => {
                   </span>
                 </p>
                 <p>
-                  <span className="font-bold">Today's Event:</span>{' '}
+                  <span className="font-bold">Today&apos;s Event:</span>{' '}
                   <span className="font-italic">
                     {eventDetails ? eventDetails.summary : 'No event for today'}
                   </span>
@@ -469,7 +469,7 @@ const AttendanceForm = () => {
                     className="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
                     onClick={handlePresentButtonClick}
                   >
-                    I'm Here!
+                    I&apos;m Here!
                   </button>
                 </div>
               )}
@@ -478,7 +478,7 @@ const AttendanceForm = () => {
               {isAttendanceCaptured && eventDetails && eventDetails.summary && (
                 <div className="mt-4 rounded-lg border border-red-100 bg-white p-4 text-center shadow-lg">
                   <p className="font-blue-100 font-italic text-xl">
-                    We have already recorded your attendance for today's event!
+                    We have already recorded your attendance for today&apos;s event!
                   </p>
                 </div>
               )}
