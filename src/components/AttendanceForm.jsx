@@ -1,10 +1,11 @@
 'use client' 
 
 import { useState, useEffect } from 'react'
-// import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 import { db } from '../utilities/firebase'
 import {
   collection,
+  addDoc,
   query,
   where,
   getDocs,
@@ -15,6 +16,7 @@ import axios from 'axios'
 
 import AttendanceModal from '../components/AttendanceModal'
 import FormConfirmationModal from '../components/AttendanceFormConfirmation'
+import AttendanceToggle from '../components/Toggle'
 
 // import {
 //   getEventDetailsFromGoogleCalendar,
@@ -202,7 +204,7 @@ const AttendanceForm = () => {
     setIsPresentButtonClicked,
   ) => {
     const newAttendanceRecord = {
-      date: new Date(event.start.dateTime), // Replace with the actual event date from Google Calendar
+      date: event ? new Date(event.start.dateTime) : new Date(), // Replace with the actual event date from Google Calendar
       event: event.summary, // Replace with the actual event name from Google Calendar
       id: id,
       no: no,
@@ -396,8 +398,13 @@ const AttendanceForm = () => {
   }
   // console.log(members)
   return (
-    <div className="flex h-screen items-start justify-center">
-      <div className="w-full max-w-md">
+    // <div className="flex h-screen items-center justify-center">
+    <div className="flex flex-col justify-center items-center">
+      <div className='mb-5'>
+      <AttendanceToggle/>
+      </div>
+      {/* <div className="w-full max-w-md justify-center"> */}
+      <div className='text-center'>
         <form
           onSubmit={handleSubmit}
           className="mb-4 rounded bg-white px-8 pb-8 pt-6 shadow-md"

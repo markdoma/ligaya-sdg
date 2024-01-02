@@ -53,6 +53,7 @@ export function Header() {
           <div className="relative z-10 flex items-center gap-16">
             <Link href="/" aria-label="Home">
               <Logo className="h-10 w-auto" />
+              
             </Link>
             <div className="hidden lg:flex lg:gap-10">
               <NavLinks />
