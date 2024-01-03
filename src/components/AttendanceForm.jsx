@@ -324,12 +324,12 @@ const AttendanceForm = ({members,eventDetails}) => {
   // console.log(members)
   return (
     // <div className="flex h-screen items-center justify-center">
-    <div className="flex flex-col justify-center items-center">
+    <>
       {/* <div className='mb-5'>
       <AttendanceToggle/>
       </div> */}
       {/* <div className="w-full max-w-md justify-center"> */}
-      <div className='text-center'>
+      <div>
         <form
           onSubmit={handleSubmit}
           className="mb-4 rounded bg-white px-8 pb-8 pt-6 shadow-md"
@@ -649,7 +649,7 @@ const AttendanceForm = ({members,eventDetails}) => {
           />
         )}
       </div>
-    </div>
+    </>
   )
 }
 

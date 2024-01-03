@@ -104,11 +104,14 @@ export default function Attendance() {
 
 
   return (
-    <>
-      {/* <AttendanceToggle/> */}
+    <div className="flex flex-col justify-center items-center">
+      <div className='mb-5'>
+        <AttendanceToggle/>
+      </div>
+      
       {/* <RegistrationForm/> */}
       <AttendanceForm members={members} eventDetails={eventDetails} />
 
-    </>
+    </div>
   )
 }
