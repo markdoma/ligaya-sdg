@@ -42,6 +42,45 @@ export default function Attendance() {
     fetchData()
   }, [])
 
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const eventsCollection = collection(db, 'calendarEvents');
+  
+      const unsubscribe = onSnapshot(eventsCollection, (snapshot) => {
+        const today = new Date();
+        const todayFormatted = today.toISOString().split('T')[0];
+        console.log(`today - ${todayFormatted}`)
+  
+        const fetchedEvents = snapshot.docs
+          .map((doc) => doc.data())
+          .filter((event) => {
+            // Assuming that the event has a 'date' property in string format
+            const eventDate = new Date(event.start);
+  
+            // Convert the event date to string in the same format as todayFormatted
+            const eventDateFormatted = eventDate.toISOString().split('T')[0];
+  
+            // Compare the event date with today's date
+            return eventDateFormatted === todayFormatted;
+          });
+  console.log(fetchedEvents)
+        if (fetchedEvents.length === 0) {
+          // If no events today, return null or handle it accordingly
+          setEventDetails(null);
+        } else {
+          setEventDetails(fetchedEvents);
+        }
+      });
+  
+      // Return the cleanup function to unsubscribe when the component unmounts
+      return () => unsubscribe();
+    };
+  
+    fetchEvents();
+  }, []);
+  
+  
+
 
   // const membersCollection = collection(db, 'master_data');
   // const [members, setMembers] = useCollectionData(membersCollection, { idField: 'doc_id' });
@@ -60,6 +99,8 @@ export default function Attendance() {
 
   //   fetchData();
   // }, [membersCollection, setMembers]);
+
+
 
 
   return (

@@ -24,6 +24,7 @@ import AttendanceToggle from '../components/Toggle'
 // } from '../utils/attendance_utils'
 
 const AttendanceForm = ({members,eventDetails}) => {
+  console.log(eventDetails)
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [dob, setDOB] = useState('')
@@ -156,8 +157,8 @@ const AttendanceForm = ({members,eventDetails}) => {
     setIsPresentButtonClicked,
   ) => {
     const newAttendanceRecord = {
-      date: event ? new Date(event.start.dateTime) : new Date(), // Replace with the actual event date from Google Calendar
-      event: event.summary, // Replace with the actual event name from Google Calendar
+      date: event ? new Date(event.start) : new Date(), // Replace with the actual event date from Google Calendar
+      event: event.event, // Replace with the actual event name from Google Calendar
       id: id,
       no: no,
       firstname: firstName,
@@ -184,8 +185,8 @@ const AttendanceForm = ({members,eventDetails}) => {
 
   useEffect(() => {
     // Check if attendance is already captured for todays event
-    if (selectedName && eventDetails && eventDetails.start.dateTime) {
-      const eventDateTime = new Date(eventDetails.start.dateTime)
+    if (selectedName && eventDetails && eventDetails.start) {
+      const eventDateTime = new Date(eventDetails.start)
 
       const attendanceQuery = query(
         collection(db, 'master_data', selectedName.doc_id, 'attendance'),
@@ -379,7 +380,7 @@ const AttendanceForm = ({members,eventDetails}) => {
                 <p>
                   <span className="font-bold">Today&apos;s Event:</span>{' '}
                   <span className="font-italic">
-                    {eventDetails ? eventDetails.summary : 'No event for today'}
+                    {eventDetails[0] ? eventDetails[0].event : 'No event for today'}
                   </span>
                 </p>
                 <p>
@@ -387,7 +388,7 @@ const AttendanceForm = ({members,eventDetails}) => {
                   <span className="font-italic">
                     {eventDetails
                       ? new Date(
-                          eventDetails.start.dateTime,
+                          eventDetails[0].start
                         ).toLocaleDateString()
                       : 'No event for today'}
                   </span>
@@ -407,7 +408,7 @@ const AttendanceForm = ({members,eventDetails}) => {
               )}
 
               {/* Render attendance message when attendance is already captured */}
-              {isAttendanceCaptured && eventDetails && eventDetails.summary && (
+              {isAttendanceCaptured && eventDetails && eventDetails.event && (
                 <div className="mt-4 rounded-lg border border-red-100 bg-white p-4 text-center shadow-lg">
                   <p className="font-blue-100 font-italic text-xl">
                     We have already recorded your attendance for today&apos;s event!
@@ -643,7 +644,7 @@ const AttendanceForm = ({members,eventDetails}) => {
               setIsConfirmed(false)
               resetForm()
             }}
-            eventSummary={eventDetails ? eventDetails.summary : ''}
+            eventSummary={eventDetails ? eventDetails.event : ''}
             name={selectedName ? selectedName.firstname : ''}
             // eventSummary={eventDetails ? eventDetails.summary : ""}
           />

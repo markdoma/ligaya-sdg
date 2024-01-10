@@ -97,9 +97,13 @@ const clearCollection = async () => {
       // Store events in Firebase collection
       await Promise.all(
         fetchedEvents.map(async (event) => {
+          const formattedDate = event.start.dateTime
+            ? new Date(event.start.dateTime).toISOString()
+            : new Date(event.start.date).toISOString();
+  
           await addDoc(collectionRef, {
             event: event.summary,
-            start: event.start,
+            start: formattedDate,
             // end: event.end,
           });
         })

@@ -1,5 +1,5 @@
 
-
+'use client'
 import AttendanceForm from '@/components/AttendanceForm'
 import RegistrationForm from '@/components/RegistrationForm'
 import AttendanceToggle from '@/components/Toggle'
