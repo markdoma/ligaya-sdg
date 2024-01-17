@@ -38,6 +38,8 @@ const CalendarSync = () => {
 
       const data = response.data.items
 
+      console.log(data)
+
 
       const confirmedEvents = data.filter((event) => {
               // Check if event has start property and either dateTime or date property

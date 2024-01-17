@@ -380,7 +380,7 @@ const AttendanceForm = ({members,eventDetails}) => {
                 <p>
                   <span className="font-bold">Today&apos;s Event:</span>{' '}
                   <span className="font-italic">
-                    {eventDetails[0] ? eventDetails[0].event : 'No event for today'}
+                    {eventDetails ? eventDetails[0].event : 'No event for today'}
                   </span>
                 </p>
                 <p>
@@ -644,7 +644,7 @@ const AttendanceForm = ({members,eventDetails}) => {
               setIsConfirmed(false)
               resetForm()
             }}
-            eventSummary={eventDetails ? eventDetails.event : ''}
+            eventSummary={eventDetails ? eventDetails[0].event : ''}
             name={selectedName ? selectedName.firstname : ''}
             // eventSummary={eventDetails ? eventDetails.summary : ""}
           />
